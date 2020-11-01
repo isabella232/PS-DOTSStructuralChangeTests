@@ -56,7 +56,7 @@ namespace Unity.Entities
 
     [StructLayout(LayoutKind.Sequential)]
     [BurstCompatible]
-    unsafe struct EntityDataAccess : IDisposable
+    unsafe partial struct EntityDataAccess : IDisposable
     {
         private delegate void PlaybackManagedDelegate(IntPtr self);
 
