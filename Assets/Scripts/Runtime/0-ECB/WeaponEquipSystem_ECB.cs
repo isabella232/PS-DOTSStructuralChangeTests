@@ -73,76 +73,7 @@ public class WeaponEquipSystem_ECB : SystemBase
             commandBuffer.AddComponent(newWeapon, new Parent { Value = weaponOwner });
             commandBuffer.AddComponent(newWeapon, new LocalToParent { Value = weaponToOwner });
 
-            commandBuffer.AddComponent<ToRegisterOwner>(newWeapon);
-        }
-    }
-
-    public struct ToRegisterOwner : IComponentData
-    {
-    }
-
-    public struct OwnerRegistered : IComponentData
-    {
-    }
-
-    [UpdateBefore(typeof(TransformSystemGroup))]
-    public class OwnerRegistrationSystem : SystemBase
-    {
-        EntityQuery m_ToRegisterOwnerGroup;
-
-        protected override void OnCreate()
-        {
-            m_ToRegisterOwnerGroup = GetEntityQuery(
-                new EntityQueryDesc
-                {
-                    All = new[] { ComponentType.ReadOnly<ToRegisterOwner>(), ComponentType.ReadOnly<Parent>() },
-                    None = new[] { ComponentType.ReadOnly<OwnerRegistered>() },
-                });
-        }
-
-        [BurstCompile]
-        struct RegisterOwnerJob : IJobChunk
-        {
-            [ReadOnly]
-            public EntityTypeHandle entityTypeHandle;
-
-            [ReadOnly]
-            public ComponentTypeHandle<Parent> parentTypeHandle;
-
-            public ComponentDataFromEntity<Weapon> weaponOwnerLookup;
-
-            public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
-            {
-                var entityChunk = chunk.GetNativeArray(entityTypeHandle);
-                var parentChunk = chunk.GetNativeArray(parentTypeHandle);
-
-                for (var i = 0; i < entityChunk.Length; i++)
-                {
-                    var entity = entityChunk[i];
-
-                    var parent = parentChunk[i];
-                    weaponOwnerLookup[parent.Value] = new Weapon { Value = entity };
-                }
-            }
-        }
-
-        protected override void OnUpdate()
-        {
-            var entityTypeHandle = GetEntityTypeHandle();
-            var parentTypeHandle = GetComponentTypeHandle<Parent>();
-            var weaponOwnerLookup = GetComponentDataFromEntity<Weapon>();
-
-            var job = new RegisterOwnerJob()
-            {
-                entityTypeHandle = entityTypeHandle,
-                parentTypeHandle = parentTypeHandle,
-                weaponOwnerLookup = weaponOwnerLookup
-            };
-
-            Dependency = job.ScheduleSingle(m_ToRegisterOwnerGroup, Dependency);
-
-            Dependency.Complete();
-            EntityManager.AddComponent(m_ToRegisterOwnerGroup, new ComponentType(typeof(OwnerRegistered)));
+            commandBuffer.SetComponent(weaponOwner, new Weapon { Value = newWeapon });
         }
     }
 }
