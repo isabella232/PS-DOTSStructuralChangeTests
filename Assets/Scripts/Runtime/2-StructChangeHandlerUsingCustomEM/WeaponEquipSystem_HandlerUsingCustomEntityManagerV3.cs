@@ -5,7 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-#if true
+#if false
 
 [UpdateBefore(typeof(TransformSystemGroup))]
 public class WeaponEquipSystem_HandlerUsingCustomEntityManagerV3 : SystemBase
